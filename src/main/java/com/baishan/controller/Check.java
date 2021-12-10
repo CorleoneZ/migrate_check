@@ -1,6 +1,7 @@
 package com.baishan.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.baishan.model.Fields;
 import com.baishan.model.Metric;
 import com.baishan.model.Tag;
 import com.baishan.service.HttpClient;
@@ -45,26 +46,37 @@ public class Check {
             String[] shell2 = new String[]{"/bin/bash", "-c", check_target};
             String target_count = ExecShell.doShell(shell2);
 
+            /* add pinyun log*/
+            //hadoop fs -ls hdfs://10.104.3.41:8020/separated/media.st.dl.pinyuncloud.com/202112101100.*vendor_pinyun*.gz |wc -l
+            String check_add = String.format("hadoop fs -ls hdfs://%s/separated/%s/%s.*vendor_pinyun*.gz |wc -l",target_url , domain, startTime);
+            logger.info("check target shell: " + check_add);
+            String[] shell3 = new String[]{"/bin/bash", "-c", check_add};
+            String add_count = ExecShell.doShell(shell3);
+
+            int s = Integer.parseInt(source_count);
+            int t = Integer.parseInt(target_count);
+            int add = Integer.parseInt(add_count);
+
             long timestamp = System.currentTimeMillis() / 1000;
-            if (target_count.equals(source_count)) {
+            if (s == t - add) {
                 logger.info("OK same count...  domain: " + domain + "  source: " + source_count + "   target: " +target_count);
 
                 /*发送监控指标*/
                 Tag tag = Tag.builder().domain(domain).build();
-                Metric metric = Metric.builder().name("bigdata_log_migration_check").value(0).fields(null).time(timestamp).endpoint(null).tags(tag).step(3000).build();
+                Fields fields = Fields.builder().diff(0).build();
+                Metric metric = Metric.builder().name("bigdata_log_migration_check").value(0).fields(fields).time(timestamp).endpoint(null).tags(tag).step(3000).build();
                 List<Metric> list = new ArrayList<Metric>();
                 list.add(metric);
                 String param = JSON.toJSONString(list);
                 String res = client.doPost("http://127.0.0.1:10699/v2/push", param);
                 logger.info("res: " + res + " param" + String.valueOf(list));
             } else {
-                int s = Integer.parseInt(source_count);
-                int t = Integer.parseInt(target_count);
                 logger.info("Error check source and target are not same...  domain: " + domain + "start time: " + startTime + " +source: " + s + "   target: " + t);
 
                 /*发送监控指标*/
                 Tag tag = Tag.builder().domain(domain).build();
-                Metric metric = Metric.builder().name("bigdata_log_migration_check").value(Math.abs(s-t)).fields(null).time(timestamp).endpoint(null).tags(tag).step(3000).build();
+                Fields fields = Fields.builder().diff(Math.abs(t-add-s)).build();
+                Metric metric = Metric.builder().name("bigdata_log_migration_check").value(Math.abs(t-add-s)).fields(fields).time(timestamp).endpoint(null).tags(tag).step(3000).build();
                 List<Metric> list = new ArrayList<Metric>();
                 list.add(metric);
                 String param = JSON.toJSONString(list);

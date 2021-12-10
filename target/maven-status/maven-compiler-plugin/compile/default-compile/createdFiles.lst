@@ -10,3 +10,4 @@ com/baishan/util/Config.class
 com/baishan/service/ScheduledTask.class
 com/baishan/util/test.class
 com/baishan/model/Fields.class
+com/baishan/model/Fields$FieldsBuilder.class
