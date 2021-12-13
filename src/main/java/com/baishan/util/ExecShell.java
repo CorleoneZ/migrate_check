@@ -2,10 +2,6 @@ package com.baishan.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ExecShell {
 
@@ -14,6 +10,7 @@ public class ExecShell {
         Process process = null;
         InputStream inputStream = null;
         String result = "";
+        StringBuffer num = new StringBuffer();
         try {
             run = Runtime.getRuntime();
             process = run.exec(cmd);
@@ -37,9 +34,9 @@ public class ExecShell {
         }
         for (int i = 0; i < result.length();++i) {
             if (Character.isDigit(result.charAt(i))) {
-                return String.valueOf(result.charAt(i));
+                num.append(result.charAt(i));
             }
         }
-        return null;
+        return String.valueOf(num);
     }
 }

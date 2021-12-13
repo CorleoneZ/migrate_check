@@ -49,7 +49,7 @@ public class Check {
             /* add pinyun log*/
             //hadoop fs -ls hdfs://10.104.3.41:8020/separated/media.st.dl.pinyuncloud.com/202112101100.*vendor_pinyun*.gz |wc -l
             String check_add = String.format("hadoop fs -ls hdfs://%s/separated/%s/%s.*vendor_pinyun*.gz |wc -l",target_url , domain, startTime);
-            logger.info("check target shell: " + check_add);
+            logger.info("check add shell: " + check_add);
             String[] shell3 = new String[]{"/bin/bash", "-c", check_add};
             String add_count = ExecShell.doShell(shell3);
 
@@ -59,7 +59,7 @@ public class Check {
 
             long timestamp = System.currentTimeMillis() / 1000;
             if (s == t - add) {
-                logger.info("OK same count...  domain: " + domain + "  source: " + source_count + "   target: " +target_count);
+                logger.info("OK same count...  domain: " + domain + "  source: " + s + "   target: " + t);
 
                 /*发送监控指标*/
                 Tag tag = Tag.builder().domain(domain).build();
