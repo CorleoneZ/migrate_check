@@ -48,14 +48,17 @@ public class Check {
 
             /* add pinyun log*/
             //hadoop fs -ls hdfs://10.104.3.41:8020/separated/media.st.dl.pinyuncloud.com/202112101100.*vendor_pinyun*.gz |wc -l
-            String check_add = String.format("hadoop fs -ls hdfs://%s/separated/%s/%s.*vendor_pinyun*.gz |wc -l",target_url , domain, startTime);
-            logger.info("check add shell: " + check_add);
-            String[] shell3 = new String[]{"/bin/bash", "-c", check_add};
-            String add_count = ExecShell.doShell(shell3);
+            int add = 0;
+            if (domain.equals("media.st.dl.pinyuncloud.com")) {
+                String check_add = String.format("hadoop fs -ls hdfs://%s/separated/%s/%s.*vendor_pinyun*.gz |wc -l",target_url , domain, startTime);
+                logger.info("check add shell: " + check_add);
+                String[] shell3 = new String[]{"/bin/bash", "-c", check_add};
+                String add_count = ExecShell.doShell(shell3);
+                add = Integer.parseInt(add_count);
+            }
 
             int s = Integer.parseInt(source_count);
             int t = Integer.parseInt(target_count);
-            int add = Integer.parseInt(add_count);
 
             long timestamp = System.currentTimeMillis() / 1000;
             if (s == t - add) {
